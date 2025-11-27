@@ -15,14 +15,23 @@ class Crew(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
 class Airport(models.Model):
     name = models.CharField(max_length=100)
     closest_big_city = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.name}"
 
 class Route(models.Model):
     source = models.ForeignKey("Airport", on_delete=models.CASCADE, related_name="routes_from")
     destination = models.ForeignKey("Airport", on_delete=models.CASCADE, related_name="routes_to")
     distance = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.source} > {self.destination}"
 
     def clean(self):
         if self.source == self.destination:
@@ -35,6 +44,9 @@ class Route(models.Model):
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return f"{self.name}"
+
 def airplane_image_path(instance: "Airplane", filename: str) -> pathlib.Path:
     filename = (f"{slugify(instance.name)}-{uuid.uuid4()}"
                 + pathlib.Path(filename).suffix)
@@ -44,8 +56,11 @@ class Airplane(models.Model):
     name = models.CharField(max_length=100)
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
-    airplane_type = models.ForeignKey("AirplaneType", on_delete=models.CASCADE)
+    airplane_type = models.ForeignKey("AirplaneType", on_delete=models.CASCADE, related_name="airplanes")
     image = models.ImageField(null=True, blank=True, upload_to=airplane_image_path)
+
+    def __str__(self):
+        return f"{self.name}, {self.rows}, {self.seats_in_row}"
 
     @property
     def capacity(self) -> int:
@@ -59,13 +74,22 @@ class Flight(models.Model):
     arrival_time = models.DateTimeField()
     crew = models.ManyToManyField(Crew)
 
+    def __str__(self):
+        return f"{self.route}, {self.airplane}, {self.departure_time}, {self.arrival_time}"
+
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.created_at}, {self.user}"
 
 class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
     flight = models.ForeignKey("Flight", on_delete=models.CASCADE)
     order = models.ForeignKey("Order", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.row}, {self.seat}, {self.flight}, {self.order}"
 
