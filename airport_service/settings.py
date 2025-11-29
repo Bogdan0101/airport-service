@@ -160,6 +160,7 @@ REST_FRAMEWORK = {
         "user": "10/min"
     },
 }
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Cinema API",
     "DESCRIPTION": "Order tickets for your cinema",
