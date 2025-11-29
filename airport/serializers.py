@@ -38,7 +38,7 @@ class RouteSerializer(serializers.ModelSerializer):
         fields = ("id", "source", "destination", "distance")
 
 
-class RouteListSerializer(serializers.ModelSerializer):
+class RouteListSerializer(RouteSerializer):
     source = serializers.CharField(source="source.name", read_only=True)
     destination = serializers.CharField(source="destination.name", read_only=True)
 
@@ -91,16 +91,19 @@ class AirplaneRetrieveSerializer(AirplaneSerializer):
 
 
 class FlightSerializer(serializers.ModelSerializer):
-    crew = CrewFullNameSerializer(many=True, read_only=True)
     class Meta:
         model = Flight
-        fields = ("id", "route", "airplane", "departure_time", "arrival_time", "crew",)
+        fields = ("id", "airplane", "departure_time", "arrival_time", "crew",)
 
 
 class FlightRetrieveSerializer(FlightSerializer):
     crew = CrewSerializer(many=True, read_only=True)
     route = RouteListSerializer(read_only=True)
     airplane = AirplaneSerializer(read_only=True)
+
+    class Meta:
+        model = Flight
+        fields = ("id", "airplane", "departure_time", "arrival_time", "crew", "route",)
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -116,17 +119,17 @@ class TicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ticket
+
         fields = ("id", "row", "seat", "flight")
 
 
 class FlightForTicketSerializer(serializers.ModelSerializer):
-    route = RouteListSerializer(read_only=True)
-    airplane = serializers.CharField(source="airplane.name", read_only=True)
-    crew = CrewFullNameSerializer(many=True, read_only=True)
+    source = serializers.CharField(source="source.name", read_only=True)
+    destination = serializers.CharField(source="destination.name", read_only=True)
 
     class Meta:
         model = Flight
-        fields = ("id", "route", "airplane", "departure_time", "arrival_time", "crew",)
+        fields = ("id", "source", "destination", "departure_time", "arrival_time",)
 
 
 class TicketListSerializer(TicketSerializer):

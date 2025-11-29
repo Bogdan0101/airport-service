@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -28,7 +29,6 @@ from airport.models import (
     AirplaneType,
     Flight,
     Order,
-    Ticket,
 )
 
 
@@ -46,6 +46,21 @@ class CrewViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(first_name__icontains=first_name)
         return queryset.distinct()
 
+    @extend_schema(parameters=[
+        OpenApiParameter(
+            name="last_name",
+            type=str,
+            description="Filter by last name(ex. ?last_name=Walker)",
+        ),
+        OpenApiParameter(
+            name="first_name",
+            type=str,
+            description="Filter by first name (ex. ?first_name=John)",
+        )
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class AirportViewSet(viewsets.ModelViewSet):
     queryset = Airport.objects.all()
@@ -57,6 +72,16 @@ class AirportViewSet(viewsets.ModelViewSet):
         if name:
             queryset = queryset.filter(name__icontains=name)
         return queryset.distinct()
+
+    @extend_schema(parameters=[
+        OpenApiParameter(
+            name="name",
+            type=str,
+            description="Filter by name (ex. ?name=Boryspil)",
+        )
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class RouteViewSet(viewsets.ModelViewSet):
@@ -79,6 +104,21 @@ class RouteViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(destination__name__icontains=destination)
         return queryset.distinct()
 
+    @extend_schema(parameters=[
+        OpenApiParameter(
+            name="source",
+            type=str,
+            description="Filter by source (ex. ?source=Boryspil)",
+        ),
+        OpenApiParameter(
+            name="destination",
+            type=str,
+            description="Filter by destination (ex. ?destination=Chopin)",
+        )
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
@@ -95,6 +135,16 @@ class AirplaneTypeViewSet(viewsets.ModelViewSet):
         if name:
             queryset = queryset.filter(name__icontains=name)
         return queryset.distinct()
+
+    @extend_schema(parameters=[
+        OpenApiParameter(
+            name="name",
+            type=str,
+            description="Filter by name (ex. ?name=Boeing)",
+        )
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
@@ -115,10 +165,20 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=name)
         return queryset.distinct()
 
+    @extend_schema(parameters=[
+        OpenApiParameter(
+            name="name",
+            type=str,
+            description="Filter by name (ex. ?name=SkyBird)",
+        )
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = (Flight.objects
-                .select_related("route", "route__source", "route__destination", "airplane", )
+                .select_related("route", "airplane", )
                 .prefetch_related("crew")
                 )
     serializer_class = FlightSerializer
@@ -140,6 +200,21 @@ class FlightViewSet(viewsets.ModelViewSet):
             return FlightRetrieveSerializer
         return FlightSerializer
 
+    @extend_schema(parameters=[
+        OpenApiParameter(
+            name="departure_time",
+            type=str,
+            description="Filter departure time by date(ex. ?date=2022-01-10)",
+        ),
+        OpenApiParameter(
+            name="arrival_time",
+            type=str,
+            description="Filter arrival time by date(ex. ?date=2022-01-10)",
+        )
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class OrderViewSet(
     mixins.CreateModelMixin,
@@ -148,12 +223,32 @@ class OrderViewSet(
     mixins.DestroyModelMixin,
     GenericViewSet,
 ):
-    queryset = Order.objects.all()
+    queryset = (Order.objects.all()
+                .select_related("user", )
+                .prefetch_related("tickets",
+                                  "tickets__flight",
+                                  "tickets__flight__route",
+                                  ))
     serializer_class = OrderSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(parameters=[
+        OpenApiParameter(
+            name="created_at",
+            type=str,
+            description="Filter by created date (ex. ?created_at=2022-01-10)",
+        )
+    ])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        created_at = self.request.GET.get("created_at")
+        queryset = self.queryset.filter(user=self.request.user)
+        if created_at:
+            created_at = datetime.strptime(created_at, "%Y-%m-%d").date()
+            queryset = queryset.filter(created_at__date=created_at)
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action == "list":
