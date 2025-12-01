@@ -1,6 +1,5 @@
 import pathlib
 import uuid
-from itertools import count
 
 from django.db import models
 from django.conf import settings

@@ -11,13 +11,13 @@ from airport.views import (
 )
 
 router = routers.DefaultRouter()
-router.register("crew", CrewViewSet)
-router.register("airports", AirportViewSet)
-router.register("routes", RouteViewSet)
-router.register("airplane_types", AirplaneTypeViewSet)
-router.register("airplanes", AirplaneViewSet)
-router.register("flights", FlightViewSet)
-router.register("orders", OrderViewSet)
+router.register("crew", CrewViewSet, basename="crew")
+router.register("airports", AirportViewSet, basename="airports")
+router.register("routes", RouteViewSet, basename="routes")
+router.register("airplane_types", AirplaneTypeViewSet, basename="airplane_types")
+router.register("airplanes", AirplaneViewSet, basename="airplanes")
+router.register("flights", FlightViewSet, basename="flights")
+router.register("orders", OrderViewSet, basename="orders")
 urlpatterns = [path("", include(router.urls))]
 
 app_name = "airport"
