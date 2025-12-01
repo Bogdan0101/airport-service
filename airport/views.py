@@ -35,7 +35,7 @@ from airport.models import (
 
 
 class CrewViewSet(viewsets.ModelViewSet):
-    queryset = Crew.objects.all()
+    queryset = Crew.objects.all().order_by("id")
     serializer_class = CrewSerializer
 
     def get_queryset(self):
@@ -65,7 +65,7 @@ class CrewViewSet(viewsets.ModelViewSet):
 
 
 class AirportViewSet(viewsets.ModelViewSet):
-    queryset = Airport.objects.all()
+    queryset = Airport.objects.all().order_by("id")
     serializer_class = AirportSerializer
 
     def get_queryset(self):
@@ -87,7 +87,10 @@ class AirportViewSet(viewsets.ModelViewSet):
 
 
 class RouteViewSet(viewsets.ModelViewSet):
-    queryset = Route.objects.all().select_related("source", "destination")
+    queryset = (Route.objects.all()
+                .select_related("source", "destination")
+                .order_by("id")
+                )
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -123,7 +126,7 @@ class RouteViewSet(viewsets.ModelViewSet):
 
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
-    queryset = AirplaneType.objects.all()
+    queryset = AirplaneType.objects.all().order_by("id")
     serializer_class = AirplaneTypeSerializer
 
     def get_serializer_class(self):
@@ -150,7 +153,7 @@ class AirplaneTypeViewSet(viewsets.ModelViewSet):
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
-    queryset = Airplane.objects.all()
+    queryset = Airplane.objects.all().order_by("id")
     serializer_class = AirplaneSerializer
 
     def get_serializer_class(self):
@@ -189,6 +192,7 @@ class FlightViewSet(viewsets.ModelViewSet):
                     - Count("tickets")
             )
         )
+        .order_by("id")
     )
     serializer_class = FlightSerializer
 
@@ -239,7 +243,9 @@ class OrderViewSet(
                 .prefetch_related("tickets",
                                   "tickets__flight",
                                   "tickets__flight__route",
-                                  ))
+                                  )
+                .order_by("id")
+                )
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
 
