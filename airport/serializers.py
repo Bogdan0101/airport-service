@@ -91,9 +91,22 @@ class AirplaneRetrieveSerializer(AirplaneSerializer):
 
 
 class FlightSerializer(serializers.ModelSerializer):
+    tickets_available = serializers.IntegerField(read_only=True)
+    source = serializers.CharField(source="route.source.name", read_only=True)
+    destination = serializers.CharField(source="route.destination.name", read_only=True)
+
     class Meta:
         model = Flight
-        fields = ("id", "airplane", "departure_time", "arrival_time", "crew",)
+        fields = (
+            "id",
+            "airplane",
+            "source",
+            "destination",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "tickets_available",
+        )
 
 
 class FlightRetrieveSerializer(FlightSerializer):
@@ -103,7 +116,15 @@ class FlightRetrieveSerializer(FlightSerializer):
 
     class Meta:
         model = Flight
-        fields = ("id", "airplane", "departure_time", "arrival_time", "crew", "route",)
+        fields = (
+            "id",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "route",
+            "tickets_available",
+        )
 
 
 class TicketSerializer(serializers.ModelSerializer):

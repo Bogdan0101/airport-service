@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db.models import Count, F
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins
 from rest_framework.viewsets import GenericViewSet
@@ -177,10 +178,17 @@ class AirplaneViewSet(viewsets.ModelViewSet):
 
 
 class FlightViewSet(viewsets.ModelViewSet):
-    queryset = (Flight.objects
-                .select_related("route", "airplane", )
-                .prefetch_related("crew")
-                )
+    queryset = (
+        Flight.objects
+        .select_related("route", "airplane", "route__source", "route__destination")
+        .prefetch_related("crew")
+        .annotate(
+            tickets_available=(
+                    F("airplane__rows") * F("airplane__seats_in_row")
+                    - Count("tickets")
+            )
+        )
+    )
     serializer_class = FlightSerializer
 
     def get_queryset(self):
