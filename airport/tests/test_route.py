@@ -4,13 +4,15 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from airport.models import Route, Airport
-from airport.serializers import RouteListSerializer, AirportSerializer
+from airport.serializers import RouteListSerializer
+from django.core.cache import cache
 
 ROUTE_URL = reverse("airport:routes-list")
 
 
 class RouteAdminTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = get_user_model().objects.create_superuser(
             email="test@gmail.com",
             password="ASDasfsfgwe$123",
@@ -72,6 +74,7 @@ class RouteAdminTests(TestCase):
 
 class RouteAuthenticatedUserTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = get_user_model().objects.create_user(
             email="test@gmail.com",
             password="ASDasfsfgwe$123",
@@ -118,8 +121,8 @@ class RouteAuthenticatedUserTests(TestCase):
 
     def test_post_authenticated_user(self):
         data = {
-            "source": self.airport3,
-            "destination": self.airport2,
+            "source": self.airport3.id,
+            "destination": self.airport2.id,
             "distance": 1200,
         }
         res = self.client.post(ROUTE_URL, data)
@@ -128,6 +131,7 @@ class RouteAuthenticatedUserTests(TestCase):
 
 class RouteUnauthenticateUserTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.client = APIClient()
 
     def test_get_unauthenticated_user(self):

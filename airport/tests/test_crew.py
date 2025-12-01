@@ -5,12 +5,14 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from airport.models import Crew
 from airport.serializers import CrewSerializer
+from django.core.cache import cache
 
 CREW_URL = reverse("airport:crew-list")
 
 
 class CrewAdminTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.admin = get_user_model().objects.create_superuser(
             email="admin123@gmail.com",
             password="ASDasfsfgwe$123",
@@ -56,6 +58,7 @@ class CrewAdminTests(TestCase):
 
 class CrewAuthenticateUserTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = get_user_model().objects.create_user(
             email="test@gmail.com",
             password="ASDasfsfgwe$123",
@@ -94,6 +97,7 @@ class CrewAuthenticateUserTests(TestCase):
 
 class CrewUnauthenticateUserTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.client = APIClient()
 
     def test_get_unauthenticated_user(self):
