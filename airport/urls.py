@@ -14,7 +14,9 @@ router = routers.DefaultRouter()
 router.register("crew", CrewViewSet, basename="crew")
 router.register("airports", AirportViewSet, basename="airports")
 router.register("routes", RouteViewSet, basename="routes")
-router.register("airplane_types", AirplaneTypeViewSet, basename="airplane_types")
+router.register("airplane_types",
+                AirplaneTypeViewSet,
+                basename="airplane_types")
 router.register("airplanes", AirplaneViewSet, basename="airplanes")
 router.register("flights", FlightViewSet, basename="flights")
 router.register("orders", OrderViewSet, basename="orders")

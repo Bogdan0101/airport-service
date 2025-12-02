@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-b8i0#i)8a4msb!4c0$ovkc&m5lfhy*qexl4%me_pdmlv(4p4_g"
+SECRET_KEY = "django-insecure-b8i0#i)8a4b!4c0$ovkc&m5lfhy*qexl4%me_pdmlv(4p4_g"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -143,7 +143,8 @@ SIMPLE_JWT = {
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS":
+        "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 5,
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",

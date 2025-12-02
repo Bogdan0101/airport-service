@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from airport.models import (
     Airport,
@@ -40,7 +41,9 @@ class RouteSerializer(serializers.ModelSerializer):
 
 class RouteListSerializer(RouteSerializer):
     source = serializers.CharField(source="source.name", read_only=True)
-    destination = serializers.CharField(source="destination.name", read_only=True)
+    destination = serializers.CharField(
+        source="destination.name",
+        read_only=True)
 
     class Meta:
         model = Route
@@ -60,7 +63,10 @@ class AirplaneForAirplaneTypeSerializer(serializers.ModelSerializer):
 
 
 class AirplaneTypeSerializer(serializers.ModelSerializer):
-    airplanes = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    airplanes = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="name")
 
     class Meta:
         model = AirplaneType
@@ -74,16 +80,26 @@ class AirplaneTypeRetrieveSerializer(AirplaneTypeSerializer):
 class AirplaneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airplane
-        fields = ("id", "name", "rows", "seats_in_row", "capacity", "airplane_type", "image",)
-        read_only_fields = ("capacity", "image", )
+        fields = ("id",
+                  "name",
+                  "rows",
+                  "seats_in_row",
+                  "capacity",
+                  "airplane_type",
+                  "image",)
+        read_only_fields = ("capacity", "image",)
+
 
 class AirplaneImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airplane
         fields = ("id", "image")
 
+
 class AirplaneListSerializer(AirplaneSerializer):
-    airplane_type = serializers.SlugRelatedField(slug_field="name", read_only=True)
+    airplane_type = serializers.SlugRelatedField(
+        slug_field="name",
+        read_only=True)
 
 
 class AirplaneRetrieveSerializer(AirplaneSerializer):
@@ -91,7 +107,12 @@ class AirplaneRetrieveSerializer(AirplaneSerializer):
 
     class Meta:
         model = Airplane
-        fields = ("id", "rows", "seats_in_row", "capacity", "airplane_type", "image",)
+        fields = ("id",
+                  "rows",
+                  "seats_in_row",
+                  "capacity",
+                  "airplane_type",
+                  "image",)
 
 
 class FlightSerializer(serializers.ModelSerializer):
@@ -109,7 +130,9 @@ class FlightSerializer(serializers.ModelSerializer):
 class FlightListSerializer(FlightSerializer):
     tickets_available = serializers.IntegerField(read_only=True)
     source = serializers.CharField(source="route.source.name", read_only=True)
-    destination = serializers.CharField(source="route.destination.name", read_only=True)
+    destination = serializers.CharField(
+        source="route.destination.name",
+        read_only=True)
 
     class Meta:
         model = Flight
@@ -162,11 +185,17 @@ class TicketSerializer(serializers.ModelSerializer):
 
 class FlightForTicketSerializer(serializers.ModelSerializer):
     source = serializers.CharField(source="source.name", read_only=True)
-    destination = serializers.CharField(source="destination.name", read_only=True)
+    destination = serializers.CharField(
+        source="destination.name",
+        read_only=True)
 
     class Meta:
         model = Flight
-        fields = ("id", "source", "destination", "departure_time", "arrival_time",)
+        fields = ("id",
+                  "source",
+                  "destination",
+                  "departure_time",
+                  "arrival_time",)
 
 
 class TicketListSerializer(TicketSerializer):
@@ -185,7 +214,10 @@ class OrderSerializer(serializers.ModelSerializer):
             tickets_data = validated_data.pop("tickets")
             order = Order.objects.create(**validated_data)
             for ticket_data in tickets_data:
-                Ticket.objects.create(order=order, **ticket_data)
+                try:
+                    Ticket.objects.create(order=order, **ticket_data)
+                except DjangoValidationError as e:
+                    raise ValidationError(e.message_dict)
             return order
 
 

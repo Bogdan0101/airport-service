@@ -28,8 +28,14 @@ class Airport(models.Model):
 
 
 class Route(models.Model):
-    source = models.ForeignKey("Airport", on_delete=models.CASCADE, related_name="routes_from")
-    destination = models.ForeignKey("Airport", on_delete=models.CASCADE, related_name="routes_to")
+    source = models.ForeignKey(
+        "Airport",
+        on_delete=models.CASCADE,
+        related_name="routes_from")
+    destination = models.ForeignKey(
+        "Airport",
+        on_delete=models.CASCADE,
+        related_name="routes_to")
     distance = models.IntegerField()
 
     def __str__(self):
@@ -61,8 +67,14 @@ class Airplane(models.Model):
     name = models.CharField(max_length=100)
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
-    airplane_type = models.ForeignKey("AirplaneType", on_delete=models.CASCADE, related_name="airplanes")
-    image = models.ImageField(null=True, blank=True, upload_to=airplane_image_path)
+    airplane_type = models.ForeignKey(
+        "AirplaneType",
+        on_delete=models.CASCADE,
+        related_name="airplanes")
+    image = models.ImageField(
+        null=True,
+        blank=True,
+        upload_to=airplane_image_path)
 
     def __str__(self):
         return f"{self.name}, {self.rows}, {self.seats_in_row}"
@@ -80,12 +92,18 @@ class Flight(models.Model):
     crew = models.ManyToManyField(Crew)
 
     def __str__(self):
-        return f"{self.route}, {self.airplane}, {self.departure_time}, {self.arrival_time}"
+        return (f"{self.route}"
+                f", {self.airplane}"
+                f", {self.departure_time}"
+                f", {self.arrival_time}")
 
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="orders")
 
     def __str__(self):
         return f"{self.created_at}, {self.user}"
@@ -97,8 +115,13 @@ class Order(models.Model):
 class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
-    flight = models.ForeignKey("Flight", on_delete=models.CASCADE, related_name="tickets")
-    order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="tickets")
+    flight = models.ForeignKey(
+        "Flight",
+        on_delete=models.CASCADE,
+        related_name="tickets")
+    order = models.ForeignKey("Order",
+                              on_delete=models.CASCADE,
+                              related_name="tickets")
 
     @staticmethod
     def validate_ticket(row, seat, airplane, error_to_raise):
@@ -111,9 +134,9 @@ class Ticket(models.Model):
                 raise error_to_raise(
                     {
                         ticket_attr_name: f"{ticket_attr_name} "
-                                          f"number must be in available range: "
-                                          f"(1, {airplane_attr_name}): "
-                                          f"(1, {count_attrs})"
+                        f"number must be in available range: "
+                        f"(1, {airplane_attr_name}): "
+                        f"(1, {count_attrs})"
                     }
                 )
 

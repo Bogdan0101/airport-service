@@ -1,6 +1,4 @@
 from datetime import datetime
-
-from django.contrib.admin import action
 from django.db.models import Count, F
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins, status
@@ -109,9 +107,11 @@ class RouteViewSet(viewsets.ModelViewSet):
         destination = self.request.GET.get("destination")
         queryset = self.queryset
         if source:
-            queryset = queryset.filter(source__name__icontains=source)
+            queryset = (queryset.
+                        filter(source__name__icontains=source))
         if destination:
-            queryset = queryset.filter(destination__name__icontains=destination)
+            queryset = (queryset.
+                        filter(destination__name__icontains=destination))
         return queryset.distinct()
 
     @extend_schema(parameters=[
@@ -206,12 +206,16 @@ class AirplaneViewSet(viewsets.ModelViewSet):
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = (
         Flight.objects
-        .select_related("route", "airplane", "route__source", "route__destination")
+        .select_related(
+            "route",
+            "airplane",
+            "route__source",
+            "route__destination")
         .prefetch_related("crew")
         .annotate(
             tickets_available=(
-                    F("airplane__rows") * F("airplane__seats_in_row")
-                    - Count("tickets")
+                F("airplane__rows") * F("airplane__seats_in_row")
+                - Count("tickets")
             )
         )
         .order_by("id")
@@ -223,10 +227,12 @@ class FlightViewSet(viewsets.ModelViewSet):
         arrival_time = self.request.GET.get("arrival_time")
         queryset = self.queryset
         if departure_time:
-            departure_time = datetime.strptime(departure_time, "%Y-%m-%d").date()
+            departure_time = datetime.strptime(
+                departure_time, "%Y-%m-%d").date()
             queryset = queryset.filter(departure_time__date=departure_time)
         if arrival_time:
-            arrival_time = datetime.strptime(arrival_time, "%Y-%m-%d").date()
+            arrival_time = datetime.strptime(
+                arrival_time, "%Y-%m-%d").date()
             queryset = queryset.filter(arrival_time__date=arrival_time)
         return queryset.distinct()
 

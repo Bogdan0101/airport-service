@@ -3,8 +3,10 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.models import (AbstractUser,
                                         UserManager as DjangoUserManager)
 
+
 class UserManager(DjangoUserManager):
     use_in_migrations = True
+
     def _create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError("The given email must be set")
