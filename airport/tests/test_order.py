@@ -7,7 +7,6 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from airport.models import Ticket, Order, AirplaneType, Airplane, Airport, Route, Flight
-from airport.serializers import OrderListSerializer
 from django.core.cache import cache
 
 ORDER_URL = reverse("airport:orders-list")
