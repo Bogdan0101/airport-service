@@ -75,7 +75,7 @@ class AirplaneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airplane
         fields = ("id", "name", "rows", "seats_in_row", "capacity", "airplane_type", "image",)
-        read_only_fields = ("capacity",)
+        read_only_fields = ("capacity", "image", )
 
 class AirplaneImageSerializer(serializers.ModelSerializer):
     class Meta:
