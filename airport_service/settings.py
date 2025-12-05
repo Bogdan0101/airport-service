@@ -13,6 +13,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,7 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-b8i0#i)8a4b!4c0$ovkc&m5lfhy*qexl4%me_pdmlv(4p4_g"
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY is not set in environment variables")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -84,7 +88,9 @@ WSGI_APPLICATION = "airport_service.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-USE_DOCKER = os.environ.get("USE_DOCKER", "0") == "1" # if in .env USE_DOCKER=0 - use GitHub else USE_DOCKER=1 - use Docker
+# if in .env USE_DOCKER=0 - use GitHub else USE_DOCKER=1 - use Docker
+USE_DOCKER = os.environ.get("USE_DOCKER", "0") == "1"
+
 if USE_DOCKER:
     MEDIA_ROOT = "/files/media"  # for DockerHub
     DATABASES = {
@@ -105,9 +111,6 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -149,7 +152,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
