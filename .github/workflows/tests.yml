@@ -53,7 +53,7 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           SECRET_KEY: test_secret_key
-          USE_DOCKER: 1
+          USE_DOCKER: 0
         run: python manage.py migrate
 
       - name: Run tests with coverage
@@ -64,7 +64,7 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           SECRET_KEY: test_secret_key
-          USE_DOCKER: 1
+          USE_DOCKER: 0
         run: |
           pytest --cov=. --cov-report=xml
 
